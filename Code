@@ -1,0 +1,131 @@
+/*
+ * return list of names of helpers for a given date
+ * @Param range; list of cells to check for helpers
+ * @Param names; list of names
+ */
+function checkPlan(range, names) {
+  var listNames = [];
+  
+  for (var i = 0; i < range.length; i++) {
+    var isWorking = range[i] == 'true'
+    if (isWorking) {
+      listNames.push(names[i]);
+    }
+  }
+  return listNames.toString();
+}
+
+/*
+ * return list of subjects for a given date where help is possible
+ * @Param range; list of cells to get helpers
+ * @Param date; date to check for helpers from @range
+ */
+function getSubject(range, date) {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  
+  var isDateEmpty = spreadsheet.getCurrentCell().offset(-1, 0).isBlank()
+  if (isDateEmpty) {
+    return;
+  }
+  
+  // true list of names from @range
+  var plan = [];
+  for (var i = 0; i < range[0].length; i++) {
+    var isWorkingDay = i == date-1
+    if (isWorkingDay) {
+      var day = range[0][i]
+      plan.push(day.toString().split(","))      
+    }
+  }
+  
+  // master list of all names from sheets
+  var names = [];
+  for (var i = 4; i < 34; i++) {
+    var name = spreadsheet.getSheets()[2].getRange("B"+i).getValue()
+    if (name) {
+      names.push(name)
+    }
+  }
+
+  // list of all subjects from all helpers available on a given day
+  var subjects = [];
+  for (var i = 4 ; i < names.length+4 ; i++) {
+    if (!plan) {return}
+    var helperIndex = names.indexOf(plan[0][i-4])
+    var rowNumber = helperIndex + 4
+    if (helperIndex > -1 && names[rowNumber-i]) {
+      var subject = spreadsheet.getSheets()[2].getRange("R" + rowNumber).getValues()
+        subjects.push(subject.toString().split(","))
+    }
+  }
+  
+  // takes each list from each helper on a given day and joins them into one master list of subjects
+  var helperList = []
+  for (var i = 0 ; i < subjects.length ; i++) {
+    for (var j = 0 ; j < subjects[i].length ; j++) {
+      helperList.push(subjects[i][j])
+    }
+  }
+  // alphabetical sort the master list of subjects
+  helperList.sort()
+  
+  
+  if (helperList.length <= 1) return;
+  
+  // removes duplicate subjects from master subject list
+  uniqueArray = helperList.filter(function(item, pos) {
+    return helperList.indexOf(item) == pos;
+  })
+  
+  var isFirstElementEmpty = uniqueArray[0].toString()===""
+  if (isFirstElementEmpty) {uniqueArray.shift()}
+  
+  // is first char of first element empty
+  if (uniqueArray[0]) {uniqueArray[0] = uniqueArray[0].substring(1)}
+  
+  if (uniqueArray) {return uniqueArray.toString()} else return;
+}
+
+/*
+ * return list of names of helpers for a given date
+ * @Param range; list of cells to check for helpers
+ * @Param date; date to check for helpers from @range
+ */
+function getHelper(range, date) {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  
+  var isDateEmpty = spreadsheet.getCurrentCell().offset(-1, 0).isBlank()
+  if (isDateEmpty) {
+    return;
+  }
+  
+  var helpers = [];
+  for (var i = 0; i < 31; i++) {
+    // compare given date to get index of helpers from given list
+    if (i == date-1) {
+      var helper = range[0][i].toString().split(",")
+      // if no helpers on a given date terminate calculation
+      if (!helper) {return}
+      for (var j = 0; j < helper.length ; j++) {
+        // if first entry into list of helpers do not add empty space in front of name for UX
+        if (!helpers) {
+          helpers.push(helper[j].toString())
+        } else {
+          helpers.push(" " + helper[j].toString())
+        }
+      }
+    }
+  }
+  return helpers.toString()
+}
+
+
+function collectSubjects(subjects, skills) {
+  var subjectsSkill = []
+  for (var i = 0 ; i < subjects[0].length ; i++) {
+    if (skills[0][i]) {
+      subjectsSkill.push(" " + subjects[0][i].toString())
+    }
+  }
+  return subjectsSkill.toString()
+}
