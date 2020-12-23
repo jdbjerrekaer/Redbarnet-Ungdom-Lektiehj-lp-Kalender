@@ -119,6 +119,19 @@ function getHelper(range, date) {
   return helpers.toString()
 }
 
+/*
+ * return list of names of helpers sorted alphabetically
+ * @Param range; list of cells to get helper's names from
+ */
+function getNames(range) {
+  if (!range) return;
+  range.sort()
+  while (range[0]=="") {
+    range.shift()
+  }
+  return range
+}
+
 
 function collectSubjects(subjects, skills) {
   var subjectsSkill = []
@@ -129,3 +142,6 @@ function collectSubjects(subjects, skills) {
   }
   return subjectsSkill.toString()
 }
+
+
+
