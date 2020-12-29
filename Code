@@ -50,7 +50,7 @@ function getSubject(range, date) {
   // list of all subjects from all helpers available on a given day
   var subjects = [];
   for (var i = 4 ; i < names.length+4 ; i++) {
-    if (!plan) {return}
+    if (!plan[0]) {return}
     var helperIndex = names.indexOf(plan[0][i-4])
     var rowNumber = helperIndex + 4
     if (helperIndex > -1 && names[rowNumber-i]) {
@@ -142,6 +142,5 @@ function collectSubjects(subjects, skills) {
   }
   return subjectsSkill.toString()
 }
-
 
 
